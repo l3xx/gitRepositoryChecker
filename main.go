@@ -14,19 +14,29 @@ import (
 )
 
 const BufStr = 10000
-const CountWorker = 1000
+const CountWorker = 5000
 
 func main() {
 	var wg sync.WaitGroup
-	runtime.GOMAXPROCS(2)
+
+	countProc := runtime.NumCPU()
+	if countProc == 1 {
+		runtime.GOMAXPROCS(2)
+	}
+
 	t := time.Now().Format(time.RFC3339)
 	ch := make(chan string, BufStr)
 	result := make(chan string, 0)
 
+	args := os.Args
+	dataBaseFileName := "./RU_Domains_ru-tld.ru"
+	if len(args) > 0 {
+		dataBaseFileName = args[0]
+	}
+
 	defer close(ch)
 	defer close(result)
-
-	go readFile(&wg, "./RU_Domains_ru-tld.ru", ch)
+	go readFile(&wg, dataBaseFileName, ch)
 	go writeFile("./result_"+t+".log", result)
 	s := spinner.New(spinner.CharSets[35], 100*time.Millisecond)
 	s.Start()
@@ -44,8 +54,9 @@ func worker(wg *sync.WaitGroup, ch chan string, result chan string) {
 		select {
 		case s, _ := <-ch:
 			sAry := strings.Split(s, "\t")
+			//log to console
+			fmt.Println(sAry[0])
 			if doRequest(sAry[0]) {
-				//fmt.Println(sAry[0])
 				result <- sAry[0]
 			}
 			wg.Done()
@@ -81,9 +92,8 @@ func readFile(wg *sync.WaitGroup, file string, ch chan string) {
 
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
-		ch <- sc.Text()
 		wg.Add(1)
-
+		ch <- sc.Text()
 	}
 	if err := sc.Err(); err != nil {
 		return
@@ -92,6 +102,7 @@ func readFile(wg *sync.WaitGroup, file string, ch chan string) {
 }
 
 func writeFile(file string, ch chan string) {
+	//log to console
 	fmt.Println("Create file result" + file)
 	f, err := os.Create(file)
 	defer f.Close()
@@ -102,7 +113,6 @@ func writeFile(file string, ch chan string) {
 		select {
 		case s, more := <-ch:
 			if more {
-
 				_, err := f.WriteString(s + "\n")
 				if err != nil {
 					return
