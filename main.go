@@ -30,8 +30,8 @@ func main() {
 
 	args := os.Args
 	dataBaseFileName := "./RU_Domains_ru-tld.ru"
-	if len(args) > 0 {
-		dataBaseFileName = args[0]
+	if len(args) > 1 {
+		dataBaseFileName = args[1]
 	}
 
 	defer close(ch)
