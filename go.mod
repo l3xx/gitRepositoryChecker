@@ -7,7 +7,7 @@ require (
 	github.com/klauspost/compress v1.7.5 // indirect
 	github.com/klauspost/cpuid v1.2.1 // indirect
 	github.com/ponzu-cms/ponzu v0.10.1 // indirect
-	github.com/valyala/fasthttp v1.4.0 // indirect
+	github.com/valyala/fasthttp v1.4.0
 	golang.org/x/crypto v0.0.0-20190701094942-4def268fd1a4 // indirect
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7 // indirect
 	golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a // indirect

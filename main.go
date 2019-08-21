@@ -35,12 +35,11 @@ func main() {
 
 	defer close(ch)
 	defer close(result)
+	wg.Add(1)
 	go readFile(&wg, dataBaseFileName, ch)
 	go writeFile("./result_"+t+".log", result)
 	for i := 0; i < CountWorker; i++ {
-		wg.Add(1)
 		go worker(&wg, ch, result)
-		wg.Done()
 	}
 	wg.Wait()
 }
@@ -48,14 +47,17 @@ func main() {
 func worker(wg *sync.WaitGroup, ch chan string, result chan string) {
 	for {
 		select {
-		case s, _ := <-ch:
-			wg.Done()
+		case s, f := <-ch:
+			if !f {
+				return
+			}
 			sAry := strings.Split(s, "\t")
 			//log to console
 			fmt.Println(sAry[0])
 			if doRequest(sAry[0]) {
 				result <- sAry[0]
 			}
+			wg.Done()
 		}
 	}
 }
@@ -80,6 +82,7 @@ func doRequest(url string) bool {
 }
 
 func readFile(wg *sync.WaitGroup, file string, ch chan string) {
+	defer wg.Done()
 	f, err := os.OpenFile(file, os.O_RDONLY, os.ModePerm)
 	if err != nil {
 		return
