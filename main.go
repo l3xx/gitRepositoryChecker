@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-const BufStr = 20000
-const CountWorker = 10000
+const BufStr = 10000
+const CountWorker = 100
 
 func main() {
 	var wg sync.WaitGroup
