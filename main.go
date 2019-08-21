@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/briandowns/spinner"
 	"github.com/valyala/fasthttp"
 	"net/http"
 	"os"
@@ -38,28 +37,25 @@ func main() {
 	defer close(result)
 	go readFile(&wg, dataBaseFileName, ch)
 	go writeFile("./result_"+t+".log", result)
-	s := spinner.New(spinner.CharSets[35], 100*time.Millisecond)
-	s.Start()
 	for i := 0; i < CountWorker; i++ {
 		wg.Add(1)
 		go worker(&wg, ch, result)
 		wg.Done()
 	}
 	wg.Wait()
-	s.Stop()
 }
 
 func worker(wg *sync.WaitGroup, ch chan string, result chan string) {
 	for {
 		select {
 		case s, _ := <-ch:
+			wg.Done()
 			sAry := strings.Split(s, "\t")
 			//log to console
 			fmt.Println(sAry[0])
 			if doRequest(sAry[0]) {
 				result <- sAry[0]
 			}
-			wg.Done()
 		}
 	}
 }
