@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-const BufStr = 10000
-const CountWorker = 5000
+const BufStr = 20000
+const CountWorker = 10000
 
 func main() {
 	var wg sync.WaitGroup
@@ -48,14 +48,14 @@ func worker(wg *sync.WaitGroup, ch chan string, result chan string) {
 	for {
 		select {
 		case s, f := <-ch:
-			if !f {
-				return
-			}
 			sAry := strings.Split(s, "\t")
 			//log to console
 			fmt.Println(sAry[0])
 			if doRequest(sAry[0]) {
 				result <- sAry[0]
+			}
+			if !f {
+				return
 			}
 			wg.Done()
 		}
